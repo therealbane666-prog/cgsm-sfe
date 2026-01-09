@@ -10,16 +10,21 @@ import { Slider } from '@/components/ui/slider'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { submarineCourseContent, type CourseSection } from '@/lib/submarine-course-data'
+import { getUserStorageKey } from '@/hooks/use-user-auth'
 
-export default function AudioCourseView() {
+interface AudioCourseViewProps {
+  userId?: number
+}
+
+export default function AudioCourseView({ userId }: AudioCourseViewProps) {
   const [selectedSection, setSelectedSection] = useState<number>(0)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [volume, setVolume] = useKV<number[]>('audio-volume', [80])
-  const [speed, setSpeed] = useKV<number[]>('audio-speed', [1])
+  const [volume, setVolume] = useKV<number[]>(getUserStorageKey('audio-volume', userId?.toString()), [80])
+  const [speed, setSpeed] = useKV<number[]>(getUserStorageKey('audio-speed', userId?.toString()), [1])
   const [currentPosition, setCurrentPosition] = useState(0)
   const [duration, setDuration] = useState(0)
   const [activeView, setActiveView] = useState<'list' | 'player'>('list')
-  const [keepScreenOn, setKeepScreenOn] = useKV<boolean>('keep-screen-on', true)
+  const [keepScreenOn, setKeepScreenOn] = useKV<boolean>(getUserStorageKey('keep-screen-on', userId?.toString()), true)
   
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const wakeLockRef = useRef<any>(null)

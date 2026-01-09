@@ -6,9 +6,14 @@ import { Download, Trophy } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { QuizAttempt } from '@/lib/data'
 import { motion } from 'framer-motion'
+import { getUserStorageKey } from '@/hooks/use-user-auth'
 
-export default function ScoresView() {
-  const [attempts] = useKV<QuizAttempt[]>('quiz-attempts', [])
+interface ScoresViewProps {
+  userId?: number
+}
+
+export default function ScoresView({ userId }: ScoresViewProps) {
+  const [attempts] = useKV<QuizAttempt[]>(getUserStorageKey('quiz-attempts', userId?.toString()), [])
 
   const handleDownloadScore = (attempt: QuizAttempt) => {
     const percentage = (attempt.score / attempt.totalQuestions * 100).toFixed(1)

@@ -13,18 +13,23 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { getUserStorageKey } from '@/hooks/use-user-auth'
 
-export default function QuizzesView() {
+interface QuizzesViewProps {
+  userId?: number
+}
+
+export default function QuizzesView({ userId }: QuizzesViewProps) {
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [showFeedback, setShowFeedback] = useState(false)
   const [answers, setAnswers] = useState<{ questionId: string; correct: boolean }[]>([])
   const [quizComplete, setQuizComplete] = useState(false)
-  const [attempts, setAttempts] = useKV<QuizAttempt[]>('quiz-attempts', [])
+  const [attempts, setAttempts] = useKV<QuizAttempt[]>(getUserStorageKey('quiz-attempts', userId?.toString()), [])
   
-  const [timedMode, setTimedMode] = useKV<boolean>('quiz-timed-mode', false)
-  const [timePerQuestion, setTimePerQuestion] = useKV<number>('quiz-time-per-question', 30)
+  const [timedMode, setTimedMode] = useKV<boolean>(getUserStorageKey('quiz-timed-mode', userId?.toString()), false)
+  const [timePerQuestion, setTimePerQuestion] = useKV<number>(getUserStorageKey('quiz-time-per-question', userId?.toString()), 30)
   const [timeRemaining, setTimeRemaining] = useState<number>(0)
   const [settingsOpen, setSettingsOpen] = useState(false)
 

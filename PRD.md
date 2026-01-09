@@ -5,12 +5,19 @@ A comprehensive submarine training application for CGSM SFE 2026 (SNA DE GRASSE)
 **Experience Qualities**:
 1. **Focused** - Clean, distraction-free interface that prioritizes learning content and quiz progression
 2. **Accessible** - Simple navigation with large touch targets optimized for smartphone use, including locked-screen audio playback
-3. **Professional** - Reliable training tool with clear feedback, score tracking, and downloadable results
+3. **Professional** - Reliable training tool with clear feedback, score tracking, downloadable results, and cross-device synchronization with user authentication
 
 **Complexity Level**: Light Application (multiple features with basic state)
 This is a training tool with course content, multiple quiz sections, audio narration, score tracking, and download capabilities - but no complex backend integrations or advanced state management beyond quiz progress and scores.
 
 ## Essential Features
+
+### User Authentication and Cross-Device Sync
+- **Functionality**: Automatically authenticates users via GitHub account and syncs all progress, scores, and preferences across devices
+- **Purpose**: Enables seamless learning experience across multiple devices (desktop, tablet, smartphone) with progress preservation
+- **Trigger**: User opens the application (authentication is automatic via Spark SDK)
+- **Progression**: App load → Fetch user info → Display user avatar/name in header → All quiz attempts, audio settings, and preferences are saved with user ID → Progress syncs automatically across devices
+- **Success criteria**: User sees their GitHub avatar and username in header, scores and settings persist when switching devices, guest mode available as fallback
 
 ### Audio Course Library with AI Narration
 - **Functionality**: Displays educational content about submarine systems with AI-generated audio narration
@@ -55,6 +62,9 @@ This is a training tool with course content, multiple quiz sections, audio narra
 - **Success criteria**: Countdown accurate to the second, color changes smooth, auto-submission works correctly, timer pauses during feedback screen, settings persist across sessions
 
 ## Edge Case Handling
+- **User not authenticated**: Show "Mode Invité" badge and save progress with guest prefix (data won't sync across devices)
+- **Authentication failure**: Display error gracefully, continue in guest mode, allow user to refresh to retry
+- **Device switching**: Automatically load user's progress when opening app on different device
 - **Empty quiz state**: Show message to select a category if user navigates directly to quiz without selection
 - **Audio loading failure**: Display error message and retry button if AI audio generation fails
 - **Incomplete quiz**: Save progress if user navigates away, offer to resume or restart
@@ -144,6 +154,8 @@ Animations should be purposeful and enhance the training experience without dist
   - Timer (countdown indicator, timed mode badge)
   - MagnifyingGlassPlus/Minus (zoom controls)
   - ArrowsOut (fullscreen toggle)
+  - User (user authentication indicator)
+  - SignOut (logout if needed)
   
 - **Spacing**: 
   - Section padding: p-6 (24px)
