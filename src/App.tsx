@@ -1,19 +1,52 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Blueprint, Clipboard, TrendUp, Headphones, User, SignOut } from '@phosphor-icons/react'
+import { Blueprint, Clipboard, TrendUp, Headphones, User, SignOut, SignIn } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import PlansView from '@/components/PlansView'
 import QuizzesView from '@/components/QuizzesView'
 import ScoresView from '@/components/ScoresView'
 import AudioCourseView from '@/components/AudioCourseView'
 import { useUserAuth } from '@/hooks/use-user-auth'
+import { toast } from 'sonner'
 
 function App() {
   const [activeTab, setActiveTab] = useState('audio-course')
-  const { user, loading: userLoading } = useUserAuth()
+  const { user, loading: userLoading, refreshUser } = useUserAuth()
+
+  const handleLogin = async () => {
+    toast.info('Connexion en cours...', {
+      description: 'Vous allez être redirigé vers GitHub pour vous authentifier.'
+    })
+    window.location.href = '/.auth/login'
+  }
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/.auth/logout', { method: 'POST' })
+      toast.success('Déconnexion réussie', {
+        description: 'Vous avez été déconnecté de votre compte.'
+      })
+      setTimeout(() => {
+        window.location.reload()
+      }, 1000)
+    } catch (error) {
+      toast.error('Erreur de déconnexion', {
+        description: 'Une erreur est survenue lors de la déconnexion.'
+      })
+    }
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -34,24 +67,46 @@ function App() {
                 </div>
               </div>
             ) : user ? (
-              <div className="flex items-center gap-3">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-foreground">{user.login}</p>
-                  <Badge variant="secondary" className="text-xs gap-1">
-                    <User size={12} weight="fill" />
-                    Connecté
-                  </Badge>
-                </div>
-                <Avatar className="h-10 w-10 border-2 border-accent">
-                  <AvatarImage src={user.avatarUrl} alt={user.login} />
-                  <AvatarFallback>{user.login.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-3 h-auto p-2 hover:bg-accent/10">
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-foreground">{user.login}</p>
+                      <Badge variant="secondary" className="text-xs gap-1">
+                        <User size={12} weight="fill" />
+                        Connecté
+                      </Badge>
+                    </div>
+                    <Avatar className="h-10 w-10 border-2 border-accent">
+                      <AvatarImage src={user.avatarUrl} alt={user.login} />
+                      <AvatarFallback>{user.login.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Mon Compte</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem disabled>
+                    <User className="mr-2 h-4 w-4" />
+                    <span>{user.login}</span>
+                  </DropdownMenuItem>
+                  {user.email && (
+                    <DropdownMenuItem disabled className="text-xs text-muted-foreground">
+                      {user.email}
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
+                    <SignOut className="mr-2 h-4 w-4" />
+                    <span>Changer de compte</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
-              <Badge variant="outline" className="gap-2">
-                <User size={16} />
-                Mode Invité
-              </Badge>
+              <Button onClick={handleLogin} variant="outline" className="gap-2">
+                <SignIn size={16} />
+                Se connecter
+              </Button>
             )}
           </div>
         </div>

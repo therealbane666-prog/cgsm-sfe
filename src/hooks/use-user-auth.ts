@@ -13,26 +13,26 @@ export function useUserAuth() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setLoading(true)
-        const userInfo = await window.spark.user()
-        setUser(userInfo)
-        setError(null)
-      } catch (err) {
-        console.error('Failed to fetch user:', err)
-        setError('Impossible de charger les informations utilisateur')
-        setUser(null)
-      } finally {
-        setLoading(false)
-      }
+  const fetchUser = async () => {
+    try {
+      setLoading(true)
+      const userInfo = await window.spark.user()
+      setUser(userInfo)
+      setError(null)
+    } catch (err) {
+      console.error('Failed to fetch user:', err)
+      setError('Impossible de charger les informations utilisateur')
+      setUser(null)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     fetchUser()
   }, [])
 
-  return { user, loading, error }
+  return { user, loading, error, refreshUser: fetchUser }
 }
 
 export function getUserStorageKey(baseKey: string, userId: string | undefined): string {
