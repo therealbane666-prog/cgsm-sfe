@@ -1,14 +1,18 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useKV } from '@github/spark/hooks'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { CheckCircle, XCircle, ArrowRight } from '@phosphor-icons/react'
+import { CheckCircle, XCircle, ArrowRight, Timer, Gear } from '@phosphor-icons/react'
 import { quizzes } from '@/lib/data'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import type { QuizAttempt } from '@/lib/data'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 export default function QuizzesView() {
   const [selectedQuiz, setSelectedQuiz] = useState<string | null>(null)
@@ -18,10 +22,61 @@ export default function QuizzesView() {
   const [answers, setAnswers] = useState<{ questionId: string; correct: boolean }[]>([])
   const [quizComplete, setQuizComplete] = useState(false)
   const [attempts, setAttempts] = useKV<QuizAttempt[]>('quiz-attempts', [])
+  
+  const [timedMode, setTimedMode] = useKV<boolean>('quiz-timed-mode', false)
+  const [timePerQuestion, setTimePerQuestion] = useKV<number>('quiz-time-per-question', 30)
+  const [timeRemaining, setTimeRemaining] = useState<number>(0)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   const quiz = selectedQuiz ? quizzes[selectedQuiz] : null
   const question = quiz?.questions[currentQuestion]
   const progress = quiz ? ((currentQuestion + 1) / quiz.questions.length) * 100 : 0
+
+  useEffect(() => {
+    if (timedMode && selectedQuiz && !showFeedback && !quizComplete && timePerQuestion) {
+      setTimeRemaining(timePerQuestion)
+      
+      const interval = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(interval)
+            handleTimeExpired()
+            return 0
+          }
+          return prev - 1
+        })
+      }, 1000)
+
+      return () => clearInterval(interval)
+    }
+  }, [currentQuestion, timedMode, selectedQuiz, showFeedback, quizComplete, timePerQuestion])
+
+  const handleTimeExpired = useCallback(() => {
+    if (selectedAnswer === null && question) {
+      toast.error('Temps écoulé!', {
+        description: 'Aucune réponse sélectionnée'
+      })
+      
+      setShowFeedback(true)
+      setAnswers(prev => [...prev, {
+        questionId: question.id,
+        correct: false
+      }])
+    }
+  }, [selectedAnswer, question])
+
+  const getTimerColor = () => {
+    const timeLimit = timePerQuestion || 30
+    const percentage = (timeRemaining / timeLimit) * 100
+    if (percentage > 50) return 'text-success'
+    if (percentage > 20) return 'text-accent'
+    return 'text-destructive'
+  }
+
+  const getTimerProgress = () => {
+    const timeLimit = timePerQuestion || 30
+    return (timeRemaining / timeLimit) * 100
+  }
 
   const handleAnswerSelect = (answerIndex: number) => {
     if (showFeedback) return
@@ -93,32 +148,97 @@ export default function QuizzesView() {
 
   if (!selectedQuiz) {
     return (
-      <div className="grid gap-4 md:grid-cols-2">
-        {Object.entries(quizzes).map(([id, quiz]) => (
-          <motion.div
-            key={id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Card 
-              className="cursor-pointer hover:border-accent transition-all duration-200 h-full"
-              onClick={() => setSelectedQuiz(id)}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Sélectionnez un Quiz</h2>
+          <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Gear size={20} />
+                Paramètres
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Paramètres du Quiz</DialogTitle>
+                <DialogDescription>
+                  Configurez le mode chronométré et le temps par question
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <Label htmlFor="timed-mode">Mode Chronométré</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Activer le compte à rebours pour chaque question
+                    </p>
+                  </div>
+                  <Switch
+                    id="timed-mode"
+                    checked={timedMode}
+                    onCheckedChange={(checked) => setTimedMode(() => checked)}
+                  />
+                </div>
+
+                {timedMode && (
+                  <div className="space-y-2">
+                    <Label htmlFor="time-per-question">Temps par Question</Label>
+                    <Select
+                      value={String(timePerQuestion || 30)}
+                      onValueChange={(value) => setTimePerQuestion(() => Number(value))}
+                    >
+                      <SelectTrigger id="time-per-question">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="15">15 secondes</SelectItem>
+                        <SelectItem value="30">30 secondes</SelectItem>
+                        <SelectItem value="45">45 secondes</SelectItem>
+                        <SelectItem value="60">60 secondes</SelectItem>
+                        <SelectItem value="90">90 secondes</SelectItem>
+                        <SelectItem value="120">2 minutes</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          {Object.entries(quizzes).map(([id, quiz]) => (
+            <motion.div
+              key={id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <CardHeader>
-                <CardTitle className="text-lg">{quiz.title}</CardTitle>
-                <CardDescription>
-                  {quiz.questions.length} questions
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Badge variant="outline">
-                  Cliquez pour commencer
-                </Badge>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+              <Card 
+                className="cursor-pointer hover:border-accent transition-all duration-200 h-full"
+                onClick={() => setSelectedQuiz(id)}
+              >
+                <CardHeader>
+                  <CardTitle className="text-lg">{quiz.title}</CardTitle>
+                  <CardDescription>
+                    {quiz.questions.length} questions
+                    {timedMode && (
+                      <Badge variant="secondary" className="ml-2">
+                        <Timer size={14} className="mr-1" />
+                        {timePerQuestion}s
+                      </Badge>
+                    )}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Badge variant="outline">
+                    Cliquez pour commencer
+                  </Badge>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
       </div>
     )
   }
@@ -208,6 +328,30 @@ export default function QuizzesView() {
           </div>
           
           <Progress value={progress} className="h-2" />
+
+          {timedMode && !showFeedback && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-card border border-border rounded-lg p-4"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Timer size={24} className={getTimerColor()} weight="fill" />
+                  <span className="text-sm font-medium text-muted-foreground">
+                    Temps restant
+                  </span>
+                </div>
+                <div className={`text-3xl font-bold ${getTimerColor()}`}>
+                  {timeRemaining}s
+                </div>
+              </div>
+              <Progress 
+                value={getTimerProgress()} 
+                className="h-2"
+              />
+            </motion.div>
+          )}
         </div>
 
         <Card>

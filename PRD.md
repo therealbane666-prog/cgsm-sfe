@@ -20,11 +20,11 @@ This is a training tool with course content, multiple quiz sections, audio narra
 - **Success criteria**: Audio plays continuously even when phone is locked, content is readable, narration is clear with feminine voice
 
 ### Multiple Quiz Categories (2-3 different quiz types, 130+ total questions)
-- **Functionality**: Presents multiple-choice questions across submarine domains (navigation, systems, safety, operations, etc.)
-- **Purpose**: Tests knowledge retention and provides practical training assessment
-- **Trigger**: User selects a quiz category from main menu or after completing a course
-- **Progression**: Quiz selection → Question display with 4 answer options → User selects answer → Immediate feedback (correct/incorrect) → Next question → Final score display with percentage
-- **Success criteria**: Smooth question flow, clear feedback, accurate scoring, at least 130 questions across multiple categories
+- **Functionality**: Presents multiple-choice questions across submarine domains (navigation, systems, safety, operations, etc.) with optional timed mode featuring countdown timer for each question
+- **Purpose**: Tests knowledge retention and provides practical training assessment with time pressure simulation
+- **Trigger**: User selects a quiz category from main menu or after completing a course, optionally enabling timed mode in settings
+- **Progression**: Quiz settings (enable timer, set time limit) → Quiz selection → Question display with 4 answer options → Countdown timer (if enabled) → User selects answer → Immediate feedback (correct/incorrect) → Next question → Final score display with percentage
+- **Success criteria**: Smooth question flow, clear feedback, accurate scoring, at least 130 questions across multiple categories, countdown timer with visual indicators, automatic submission when time expires
 
 ### Score Tracking and Download
 - **Functionality**: Records quiz attempts, displays results, and allows downloading score reports
@@ -40,12 +40,21 @@ This is a training tool with course content, multiple quiz sections, audio narra
 - **Progression**: User opens audio controls → Adjusts speed (0.5x-2x) → Adjusts volume → Enables/disables background playback → Settings persist
 - **Success criteria**: Audio continues when screen locks, speed changes are smooth, controls are intuitive
 
+### Timed Quiz Mode
+- **Functionality**: Optional countdown timer for each quiz question with configurable time limits (15s to 2 minutes)
+- **Purpose**: Simulates exam pressure and improves quick decision-making skills
+- **Trigger**: User enables timed mode in quiz settings before starting a quiz
+- **Progression**: Settings menu → Toggle timed mode → Select time per question → Start quiz → Visual countdown with color indicators (green>50%, orange>20%, red<20%) → Auto-submit when time expires
+- **Success criteria**: Countdown accurate to the second, color changes smooth, auto-submission works correctly, timer pauses during feedback screen, settings persist across sessions
+
 ## Edge Case Handling
 - **Empty quiz state**: Show message to select a category if user navigates directly to quiz without selection
 - **Audio loading failure**: Display error message and retry button if AI audio generation fails
 - **Incomplete quiz**: Save progress if user navigates away, offer to resume or restart
 - **No score history**: Show empty state with encouragement to take first quiz
 - **Browser audio restrictions**: Prompt user to enable audio permissions on first interaction
+- **Timer expiration**: Auto-submit current answer (or mark as incorrect) when countdown reaches zero, show appropriate feedback
+- **Settings change mid-quiz**: Timer settings only apply to new quiz sessions, not current active quiz
 
 ## Design Direction
 The design should evoke professionalism, clarity, and technical precision reminiscent of submarine instrumentation - clean interfaces with high contrast, organized information hierarchy, and utilitarian efficiency.
@@ -81,38 +90,46 @@ Animations should be purposeful and enhance the training experience without dist
 - Score reveal: 400ms count-up animation
 - Audio controls: 200ms smooth state changes
 - Navigation: 250ms fade between sections
+- Timer countdown: Smooth color transitions (green→orange→red) based on remaining time percentage
+- Timer appearance: 200ms fade-in when question loads
 
 ## Component Selection
 - **Components**: 
   - Tabs (main navigation between Courses/Quizzes/Scores)
-  - Card (course content, quiz questions, score summaries)
+  - Card (course content, quiz questions, score summaries, timer display)
   - Button (answer options, navigation, audio controls)
-  - Progress (quiz completion indicator)
+  - Progress (quiz completion indicator, timer countdown bar)
   - Scroll Area (course content, question history)
-  - Dialog (score download confirmation, settings)
-  - Badge (category labels, correct/incorrect indicators)
+  - Dialog (score download confirmation, quiz settings with timer options)
+  - Badge (category labels, correct/incorrect indicators, timer status)
   - Slider (audio speed/volume controls)
+  - Switch (enable/disable timed mode)
+  - Select (time per question dropdown)
   
 - **Customizations**: 
   - Large touch-friendly answer buttons (min 56px height)
   - Custom audio player with waveform visualization
   - Quiz progress indicator with segment highlighting
   - Score download button with icon
+  - Timer card with color-coded countdown (green/orange/red based on time remaining)
+  - Timer badge on quiz cards showing time limit when timed mode enabled
   
 - **States**: 
   - Buttons: Default (navy), Hover (lighter navy), Active (cyan), Disabled (gray), Selected (cyan with checkmark)
   - Answer options: Unselected (neutral), Selected (cyan border), Correct (green fill), Incorrect (red fill)
   - Audio controls: Playing (pulsing cyan), Paused (static gray), Loading (spinning)
+  - Timer: Safe (green >50%), Warning (orange 20-50%), Critical (red <20%), Expired (gray)
   
 - **Icon Selection**: 
   - Play/Pause (audio controls)
   - BookOpen (courses)
-  - ClipboardList (quizzes)
-  - TrendingUp (scores)
+  - Clipboard (quizzes)
+  - TrendUp (scores)
   - Download (export scores)
-  - Settings (audio adjustments)
+  - Gear (quiz settings)
   - CheckCircle (correct answers)
   - XCircle (incorrect answers)
+  - Timer (countdown indicator, timed mode badge)
   
 - **Spacing**: 
   - Section padding: p-6 (24px)
