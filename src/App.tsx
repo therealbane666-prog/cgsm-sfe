@@ -1,26 +1,31 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { BookOpen, Clipboard, TrendUp } from '@phosphor-icons/react'
+import { BookOpen, Clipboard, TrendUp, Headphones } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import CoursesView from '@/components/CoursesView'
 import QuizzesView from '@/components/QuizzesView'
 import ScoresView from '@/components/ScoresView'
+import AudioCourseView from '@/components/AudioCourseView'
 
 function App() {
-  const [activeTab, setActiveTab] = useState('courses')
+  const [activeTab, setActiveTab] = useState('audio-course')
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-2xl font-bold text-accent">Formation Sous-Marin</h1>
-          <p className="text-sm text-muted-foreground">Cours et Quiz de Formation</p>
+          <p className="text-sm text-muted-foreground">Cours Audio Complet et Quiz de Formation</p>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
+            <TabsTrigger value="audio-course" className="flex items-center gap-2">
+              <Headphones size={20} />
+              <span className="hidden sm:inline">Cours Audio</span>
+            </TabsTrigger>
             <TabsTrigger value="courses" className="flex items-center gap-2">
               <BookOpen size={20} />
               <span className="hidden sm:inline">Cours</span>
@@ -34,6 +39,10 @@ function App() {
               <span className="hidden sm:inline">Scores</span>
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="audio-course">
+            <AudioCourseView />
+          </TabsContent>
 
           <TabsContent value="courses">
             <CoursesView />
