@@ -1,6 +1,6 @@
 # Planning Guide
 
-A comprehensive submarine training application that delivers educational courses and multiple-choice quizzes across various submarine domains, featuring AI-generated audio narration with a soft feminine voice, score tracking, and audio control capabilities.
+A comprehensive submarine training application for CGSM SFE 2026 (SNA DE GRASSE) that delivers educational courses with audio narration, Suffren submarine blueprints, and multiple-choice quizzes across various submarine domains, featuring AI-generated audio narration with a soft feminine voice, score tracking, and audio control capabilities.
 
 **Experience Qualities**:
 1. **Focused** - Clean, distraction-free interface that prioritizes learning content and quiz progression
@@ -12,12 +12,19 @@ This is a training tool with course content, multiple quiz sections, audio narra
 
 ## Essential Features
 
-### Course Library with Audio Narration
+### Audio Course Library with AI Narration
 - **Functionality**: Displays educational content about submarine systems with AI-generated audio narration
 - **Purpose**: Provides foundational knowledge before quiz attempts
 - **Trigger**: User selects a course topic from the main menu
 - **Progression**: Course selection → Content display with play/pause controls → Audio narration plays with text highlighting → User can adjust audio speed/volume → Navigate to related quiz
 - **Success criteria**: Audio plays continuously even when phone is locked, content is readable, narration is clear with feminine voice
+
+### Suffren Submarine Plans Viewer
+- **Functionality**: Displays detailed blueprints of the SNA Suffren with zoom, pan, and download capabilities
+- **Purpose**: Provides technical reference material for submarine structure and systems
+- **Trigger**: User selects the "Plans" tab from main navigation
+- **Progression**: Tab selection → Plans display with embedded viewer → User can zoom in/out → User can toggle fullscreen → User can download original file
+- **Success criteria**: Plans are clearly visible, zoom controls work smoothly, download opens Google Drive link, fullscreen mode works on mobile
 
 ### Multiple Quiz Categories (2-3 different quiz types, 130+ total questions)
 - **Functionality**: Presents multiple-choice questions across submarine domains (navigation, systems, safety, operations, etc.) with optional timed mode featuring countdown timer for each question
@@ -95,9 +102,9 @@ Animations should be purposeful and enhance the training experience without dist
 
 ## Component Selection
 - **Components**: 
-  - Tabs (main navigation between Courses/Quizzes/Scores)
-  - Card (course content, quiz questions, score summaries, timer display)
-  - Button (answer options, navigation, audio controls)
+  - Tabs (main navigation between Audio Course/Plans/Quizzes/Scores)
+  - Card (course content, plans viewer, quiz questions, score summaries, timer display)
+  - Button (answer options, navigation, audio controls, zoom controls)
   - Progress (quiz completion indicator, timer countdown bar)
   - Scroll Area (course content, question history)
   - Dialog (score download confirmation, quiz settings with timer options)
@@ -105,6 +112,7 @@ Animations should be purposeful and enhance the training experience without dist
   - Slider (audio speed/volume controls)
   - Switch (enable/disable timed mode)
   - Select (time per question dropdown)
+  - Footer (legal notice with copyright information)
   
 - **Customizations**: 
   - Large touch-friendly answer buttons (min 56px height)
@@ -113,29 +121,36 @@ Animations should be purposeful and enhance the training experience without dist
   - Score download button with icon
   - Timer card with color-coded countdown (green/orange/red based on time remaining)
   - Timer badge on quiz cards showing time limit when timed mode enabled
+  - Embedded Google Drive viewer for plans with zoom controls
+  - Legal footer with copyright notice from Bastien Verdu
   
 - **States**: 
   - Buttons: Default (navy), Hover (lighter navy), Active (cyan), Disabled (gray), Selected (cyan with checkmark)
   - Answer options: Unselected (neutral), Selected (cyan border), Correct (green fill), Incorrect (red fill)
   - Audio controls: Playing (pulsing cyan), Paused (static gray), Loading (spinning)
   - Timer: Safe (green >50%), Warning (orange 20-50%), Critical (red <20%), Expired (gray)
+  - Zoom controls: Default (outline), Disabled (when at min/max zoom)
   
 - **Icon Selection**: 
   - Play/Pause (audio controls)
-  - BookOpen (courses)
+  - Headphones (audio course tab)
+  - Blueprint (plans tab)
   - Clipboard (quizzes)
   - TrendUp (scores)
-  - Download (export scores)
+  - Download (export scores, download plans)
   - Gear (quiz settings)
   - CheckCircle (correct answers)
   - XCircle (incorrect answers)
   - Timer (countdown indicator, timed mode badge)
+  - MagnifyingGlassPlus/Minus (zoom controls)
+  - ArrowsOut (fullscreen toggle)
   
 - **Spacing**: 
   - Section padding: p-6 (24px)
   - Card gaps: gap-4 (16px)
   - Button spacing: space-y-3 (12px between)
   - Component margins: mb-6 (24px)
+  - Footer padding: py-6 (24px vertical)
   
 - **Mobile**: 
   - Single column layout throughout
@@ -144,3 +159,4 @@ Animations should be purposeful and enhance the training experience without dist
   - Full-width answer buttons
   - Collapsible score history
   - Bottom sheet for settings instead of dialog
+  - Responsive footer with centered legal text
