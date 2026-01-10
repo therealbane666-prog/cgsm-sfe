@@ -61,17 +61,27 @@ This is a training tool with course content, multiple quiz sections, audio narra
 - **Progression**: Settings menu → Toggle timed mode → Select time per question → Start quiz → Visual countdown with color indicators (green>50%, orange>20%, red<20%) → Auto-submit when time expires
 - **Success criteria**: Countdown accurate to the second, color changes smooth, auto-submission works correctly, timer pauses during feedback screen, settings persist across sessions
 
+### Account Data Management and Deletion
+- **Functionality**: Export complete user data (quiz history, scores, settings, statistics) and permanently delete account with all associated data
+- **Purpose**: Provides data transparency, backup capability, and GDPR-compliant account deletion
+- **Trigger**: User navigates to "Compte" tab or clicks "Paramètres du compte" in user dropdown
+- **Progression**: Settings view → View data summary → Export data (download detailed TXT report with JSON backup) OR Delete account → Confirm username → Delete all user data → Logout and reload
+- **Success criteria**: Export includes all user data in human-readable format plus JSON backup, deletion removes all user-specific keys from storage, confirmation required before deletion, user logged out after deletion
+
 ## Edge Case Handling
-- **User not authenticated**: Show "Mode Invité" badge and save progress with guest prefix (data won't sync across devices)
+- **User not authenticated**: Show "Mode Invité" badge and save progress with guest prefix (data won't sync across devices), show login prompt in settings tab
 - **Authentication failure**: Display error gracefully, continue in guest mode, allow user to refresh to retry
 - **Device switching**: Automatically load user's progress when opening app on different device
 - **Empty quiz state**: Show message to select a category if user navigates directly to quiz without selection
 - **Audio loading failure**: Display error message and retry button if AI audio generation fails
 - **Incomplete quiz**: Save progress if user navigates away, offer to resume or restart
-- **No score history**: Show empty state with encouragement to take first quiz
+- **No score history**: Show empty state with encouragement to take first quiz, display zero stats in export
 - **Browser audio restrictions**: Prompt user to enable audio permissions on first interaction
 - **Timer expiration**: Auto-submit current answer (or mark as incorrect) when countdown reaches zero, show appropriate feedback
 - **Settings change mid-quiz**: Timer settings only apply to new quiz sessions, not current active quiz
+- **Export with no data**: Allow export even with minimal data, include account info and default settings
+- **Deletion confirmation mismatch**: Disable delete button until username typed correctly, prevent accidental deletion
+- **Deletion in progress**: Show loading state, prevent duplicate requests, handle logout errors gracefully
 
 ## Design Direction
 The design should evoke professionalism, clarity, and technical precision reminiscent of submarine instrumentation - clean interfaces with high contrast, organized information hierarchy, and utilitarian efficiency.
@@ -112,16 +122,19 @@ Animations should be purposeful and enhance the training experience without dist
 
 ## Component Selection
 - **Components**: 
-  - Tabs (main navigation between Audio Course/Plans/Quizzes/Scores)
-  - Card (course content, plans viewer, quiz questions, score summaries, timer display)
-  - Button (answer options, navigation, audio controls, zoom controls)
+  - Tabs (main navigation between Audio Course/Plans/Quizzes/Scores/Compte)
+  - Card (course content, plans viewer, quiz questions, score summaries, timer display, data export, account deletion)
+  - Button (answer options, navigation, audio controls, zoom controls, export, delete)
   - Progress (quiz completion indicator, timer countdown bar)
   - Scroll Area (course content, question history)
-  - Dialog (score download confirmation, quiz settings with timer options)
-  - Badge (category labels, correct/incorrect indicators, timer status)
+  - Dialog (score download confirmation, quiz settings with timer options, data export confirmation)
+  - AlertDialog (account deletion with username confirmation)
+  - Badge (category labels, correct/incorrect indicators, timer status, data statistics)
   - Slider (audio speed/volume controls)
   - Switch (enable/disable timed mode)
   - Select (time per question dropdown)
+  - Input (username confirmation for deletion)
+  - Label (form labels in settings)
   - Footer (legal notice with copyright information)
   
 - **Customizations**: 
@@ -133,13 +146,17 @@ Animations should be purposeful and enhance the training experience without dist
   - Timer badge on quiz cards showing time limit when timed mode enabled
   - Embedded Google Drive viewer for plans with zoom controls
   - Legal footer with copyright notice from Bastien Verdu
+  - Data summary cards with statistics badges
+  - Danger zone card with destructive styling for account deletion
+  - Username confirmation input with monospace font
   
 - **States**: 
-  - Buttons: Default (navy), Hover (lighter navy), Active (cyan), Disabled (gray), Selected (cyan with checkmark)
+  - Buttons: Default (navy), Hover (lighter navy), Active (cyan), Disabled (gray), Selected (cyan with checkmark), Destructive (red)
   - Answer options: Unselected (neutral), Selected (cyan border), Correct (green fill), Incorrect (red fill)
   - Audio controls: Playing (pulsing cyan), Paused (static gray), Loading (spinning)
   - Timer: Safe (green >50%), Warning (orange 20-50%), Critical (red <20%), Expired (gray)
   - Zoom controls: Default (outline), Disabled (when at min/max zoom)
+  - Delete button: Disabled (gray) until confirmation matches, Loading (spinner), Enabled (red)
   
 - **Icon Selection**: 
   - Play/Pause (audio controls)
@@ -147,15 +164,18 @@ Animations should be purposeful and enhance the training experience without dist
   - Blueprint (plans tab)
   - Clipboard (quizzes)
   - TrendUp (scores)
-  - Download (export scores, download plans)
-  - Gear (quiz settings)
-  - CheckCircle (correct answers)
+  - Download (export scores, download plans, export data)
+  - Gear (quiz settings, account settings tab)
+  - CheckCircle (correct answers, export features list)
   - XCircle (incorrect answers)
   - Timer (countdown indicator, timed mode badge)
   - MagnifyingGlassPlus/Minus (zoom controls)
   - ArrowsOut (fullscreen toggle)
   - User (user authentication indicator)
   - SignOut (logout if needed)
+  - Trash (account deletion)
+  - Warning (danger zone, deletion warnings)
+  - FileText (data export dialog)
   
 - **Spacing**: 
   - Section padding: p-6 (24px)
@@ -163,6 +183,7 @@ Animations should be purposeful and enhance the training experience without dist
   - Button spacing: space-y-3 (12px between)
   - Component margins: mb-6 (24px)
   - Footer padding: py-6 (24px vertical)
+  - Settings card spacing: space-y-6 (24px between sections)
   
 - **Mobile**: 
   - Single column layout throughout
@@ -172,3 +193,5 @@ Animations should be purposeful and enhance the training experience without dist
   - Collapsible score history
   - Bottom sheet for settings instead of dialog
   - Responsive footer with centered legal text
+  - Full-width export/delete buttons on mobile
+  - Accessible account settings from user dropdown

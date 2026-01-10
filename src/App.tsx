@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Blueprint, Clipboard, TrendUp, Headphones, User, SignOut, SignIn } from '@phosphor-icons/react'
+import { Blueprint, Clipboard, TrendUp, Headphones, User, SignOut, SignIn, Gear } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
@@ -18,6 +18,7 @@ import PlansView from '@/components/PlansView'
 import QuizzesView from '@/components/QuizzesView'
 import ScoresView from '@/components/ScoresView'
 import AudioCourseView from '@/components/AudioCourseView'
+import AccountSettings from '@/components/AccountSettings'
 import { useUserAuth } from '@/hooks/use-user-auth'
 import { toast } from 'sonner'
 
@@ -96,6 +97,10 @@ function App() {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setActiveTab('settings')} className="cursor-pointer">
+                    <Gear className="mr-2 h-4 w-4" />
+                    <span>Paramètres du compte</span>
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive cursor-pointer">
                     <SignOut className="mr-2 h-4 w-4" />
                     <span>Changer de compte</span>
@@ -122,7 +127,7 @@ function App() {
         )}
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="audio-course" className="flex items-center gap-2">
               <Headphones size={20} />
               <span className="hidden sm:inline">Cours Audio</span>
@@ -138,6 +143,10 @@ function App() {
             <TabsTrigger value="scores" className="flex items-center gap-2">
               <TrendUp size={20} />
               <span className="hidden sm:inline">Scores</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Gear size={20} />
+              <span className="hidden sm:inline">Compte</span>
             </TabsTrigger>
           </TabsList>
 
@@ -155,6 +164,10 @@ function App() {
 
           <TabsContent value="scores">
             <ScoresView userId={user?.id} />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <AccountSettings userId={user?.id} userLogin={user?.login} />
           </TabsContent>
         </Tabs>
       </main>
