@@ -151,7 +151,7 @@ function App() {
           </TabsList>
 
           <TabsContent value="audio-course">
-            <AudioCourseView userId={user?.id} />
+            <AudioCourseView userId={user?.id} onStartQuiz={() => setActiveTab('quizzes')} />
           </TabsContent>
 
           <TabsContent value="plans">
